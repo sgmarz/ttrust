@@ -3,7 +3,7 @@ fn main() {
     let mut lexer = lex::Lexer::new(&input);
     let mut token = lexer.get_token();
     while token.kind != token::TokenType::Eof {
-        println!("{}", token.kind as i32);
+        println!("{:?}", token.kind);
         token = lexer.get_token();
     }
 }

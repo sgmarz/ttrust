@@ -1,4 +1,4 @@
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 #[repr(i32)]
 pub enum TokenType {
     Unknown = -2,
