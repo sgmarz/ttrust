@@ -1,12 +1,14 @@
 fn main() {
-    let input = String::from("LET foobar = 123");
+    let input = String::from("+- */");
     let mut lexer = lex::Lexer::new(&input);
-    while lexer.peek() != '\0' {
-        println!("{}", lexer.cur_char);
-        lexer.next_char();
+    let mut token = lexer.get_token();
+    while token.kind != token::TokenType::Eof {
+        println!("{}", token.kind as i32);
+        token = lexer.get_token();
     }
 }
 
 pub mod lex;
 pub mod parse;
 pub mod emit;
+pub mod token;
