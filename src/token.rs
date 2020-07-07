@@ -56,4 +56,20 @@ impl Token {
             kind
         }
     }
+    pub fn check_if_keyword(token_text: &str) -> TokenType {
+        match token_text {
+            "LABEL" => TokenType::Label,
+            "GOTO" => TokenType::Goto,
+            "PRINT" => TokenType::Print,
+            "INPUT" => TokenType::Input,
+            "LET" => TokenType::Let,
+            "IF" => TokenType::If,
+            "THEN" => TokenType::Then,
+            "ENDIF" => TokenType::EndIf,
+            "WHILE" => TokenType::While,
+            "REPEAT" => TokenType::Repeat,
+            "ENDWHILE" => TokenType::EndWhile,
+            _ => TokenType::Unknown,
+        }
+    }
 }
