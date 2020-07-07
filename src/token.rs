@@ -44,6 +44,7 @@ impl PartialEq for TokenType {
     }
 }
 
+#[derive(Clone)]
 pub struct Token {
     pub text: String,
     pub kind: TokenType,
@@ -54,6 +55,12 @@ impl Token {
         Self {
             text: token_text.clone(),
             kind
+        }
+    }
+    pub fn sentinel() -> Self {
+        Self {
+            text: String::new(),
+            kind: TokenType::Unknown,
         }
     }
     pub fn check_if_keyword(token_text: &str) -> TokenType {
