@@ -57,12 +57,14 @@ impl Token {
             kind
         }
     }
+    /// Return a new, sentinel value
     pub fn sentinel() -> Self {
         Self {
             text: String::new(),
             kind: TokenType::Unknown,
         }
     }
+    /// Return the token type of a given string keyword
     pub fn check_if_keyword(token_text: &str) -> TokenType {
         match token_text {
             "LABEL" => TokenType::Label,

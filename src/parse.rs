@@ -41,13 +41,20 @@ impl<'a> Parser<'a> {
         self.peek_token = self.lexer.get_token();
     }
 
+    /// The program itself token
     pub fn program(&mut self) {
         println!("PROGRAM");
+        // Skip preceding newlines
+        while self.check_token(TokenType::Newline) {
+            self.next_token();
+        }
+        // We have some "meat", see what it is
         while !self.check_token(TokenType::Eof) {
             self.statement();
         }
     }
 
+    /// A particular statement in a program
     pub fn statement(&mut self) {
         match self.cur_token.kind {
             TokenType::Print => {
@@ -60,12 +67,32 @@ impl<'a> Parser<'a> {
                     self.expression();
                 }
             }
+            TokenType::If => {
+                println!("STATEMENT-IF");
+                self.next_token();
+                self.comparison();
+                self.match_token(TokenType::Then);
+                self.nl();
+                while !self.check_token(TokenType::EndIf) {
+                    self.statement();
+                }
+                self.match_token(TokenType::EndIf);
+            }
+            TokenType::Let => {
+                println!("STATEMENT-LET");
+                self.next_token();
+                self.match_token(TokenType::Ident);
+                self.match_token(TokenType::Eq);
+                self.expression();
+            }
             _ => {
-
+                panic!("Invalid statement ({:?})", self.cur_token.kind);
             }
         }
+        self.nl();
     }
 
+    /// A newline token in a statement
     pub fn nl(&mut self) {
         println!("NEWLINE");
         self.match_token(TokenType::Newline);
@@ -73,10 +100,13 @@ impl<'a> Parser<'a> {
             self.next_token();
         }
     }
-
+    /// An expression in a statement
     pub fn expression(&mut self) {
         println!("EXPRESSION");
         
+    }
+    pub fn comparison(&mut self) {
+        println!("COMPARISON");
     }
 }
 
