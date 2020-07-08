@@ -12,8 +12,8 @@ impl<'a> Parser<'a> {
     pub fn new(lexer: &'a mut Lexer) -> Self {
         let mut s = Self {
             lexer,
-            cur_token: Token::sentinel(),
-            peek_token: Token::sentinel(),
+            cur_token: Token::default(),
+            peek_token: Token::default(),
         };
         s.next_token();
         s.next_token();
