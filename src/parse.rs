@@ -1,11 +1,14 @@
 
 use crate::lex::Lexer;
 use crate::token::{Token, TokenType};
-
+use std::collections::BTreeSet;
 pub struct Parser<'a> {
-    pub lexer: &'a mut Lexer,
+    lexer: &'a mut Lexer,
     cur_token: Token,
-    peek_token: Token
+    peek_token: Token,
+    symbols: BTreeSet<String>,
+    labels_declared: BTreeSet<String>,
+    labels_gotoed: BTreeSet<String>,
 }
 
 impl<'a> Parser<'a> {
@@ -14,6 +17,9 @@ impl<'a> Parser<'a> {
             lexer,
             cur_token: Token::default(),
             peek_token: Token::default(),
+            symbols: BTreeSet::new(),
+            labels_declared: BTreeSet::new(),
+            labels_gotoed: BTreeSet::new(),
         };
         s.next_token();
         s.next_token();
@@ -21,25 +27,38 @@ impl<'a> Parser<'a> {
     }
 
     /// Check if the current token matches
-    pub fn check_token(&self, kind: TokenType) -> bool {
+    fn check_token(&self, kind: TokenType) -> bool {
         kind == self.cur_token.kind
     }
     /// Check the peek token
-    pub fn check_peek(&self, kind: TokenType) -> bool {
-        kind == self.peek_token.kind
-    }
+    // fn check_peek(&self, kind: TokenType) -> bool {
+        // kind == self.peek_token.kind
+    // }
     /// Advance to next token (or give an error)
-    pub fn match_token(&mut self, kind: TokenType) {
+    fn match_token(&mut self, kind: TokenType) {
         if !self.check_token(kind) {
             panic!("Expected {:?}, got {:?}", kind, self.cur_token.kind);
         }
         self.next_token();
     }
     /// Get the next token from the lexer
-    pub fn next_token(&mut self) {
+    fn next_token(&mut self) {
         self.cur_token = self.peek_token.clone();
         self.peek_token = self.lexer.get_token();
     }
+
+    // See if we are looking at the comparison operator
+    fn is_comparison_operator(&self) -> bool {
+        match self.cur_token.kind {
+            TokenType::Gt | TokenType::GtEq | TokenType::Lt | TokenType::LtEq | TokenType::EqEq | TokenType::NotEq => true,
+            _ => false
+        }
+    }
+
+
+    // ////////////////////////
+    // Lexer Interface
+    // ////////////////////////
 
     /// The program itself token
     pub fn program(&mut self) {
@@ -52,10 +71,16 @@ impl<'a> Parser<'a> {
         while !self.check_token(TokenType::Eof) {
             self.statement();
         }
+
+        for label in self.labels_gotoed.iter() {
+            if !self.labels_declared.contains(label) {
+                panic!("Attempted to GOTO to undeclared label '{}'", label);
+            }
+        }
     }
 
     /// A particular statement in a program
-    pub fn statement(&mut self) {
+    fn statement(&mut self) {
         match self.cur_token.kind {
             TokenType::Print => {
                 println!("STATEMENT-PRINT");
@@ -78,12 +103,46 @@ impl<'a> Parser<'a> {
                 }
                 self.match_token(TokenType::EndIf);
             }
+            TokenType::While => {
+                println!("STATEMENT-WHILE");
+                self.next_token();
+                self.comparison();
+                self.match_token(TokenType::Repeat);
+                self.nl();
+                while !self.check_token(TokenType::EndWhile) {
+                    self.statement();
+                }  
+                self.match_token(TokenType::EndWhile);
+            }
+            TokenType::Label => {
+                println!("STATEMENT-LABEL");
+                self.next_token();
+                if self.labels_declared.contains(&self.cur_token.text) {
+                    panic!("Label already declared '{}'", self.cur_token.text);
+                }
+                self.match_token(TokenType::Ident);
+            }
+            TokenType::Goto => {
+                println!("STATEMENT-GOTO");
+                self.next_token();
+                self.labels_gotoed.insert(self.cur_token.text.clone());
+                self.match_token(TokenType::Ident);
+            }
             TokenType::Let => {
                 println!("STATEMENT-LET");
                 self.next_token();
+                if !self.symbols.contains(&self.cur_token.text) {
+                    self.symbols.insert(self.cur_token.text.clone());
+                }
                 self.match_token(TokenType::Ident);
                 self.match_token(TokenType::Eq);
                 self.expression();
+            }
+            TokenType::Input => {
+                println!("STATEMENT-INPUT");
+                self.next_token();
+                self.symbols.insert(self.cur_token.text.clone());
+                self.match_token(TokenType::Ident);
             }
             _ => {
                 panic!("Invalid statement ({:?})", self.cur_token.kind);
@@ -93,7 +152,7 @@ impl<'a> Parser<'a> {
     }
 
     /// A newline token in a statement
-    pub fn nl(&mut self) {
+    fn nl(&mut self) {
         println!("NEWLINE");
         self.match_token(TokenType::Newline);
         while self.check_token(TokenType::Newline) {
@@ -101,12 +160,63 @@ impl<'a> Parser<'a> {
         }
     }
     /// An expression in a statement
-    pub fn expression(&mut self) {
+    fn expression(&mut self) {
         println!("EXPRESSION");
-        
+        self.term();
+
+        while self.check_token(TokenType::Plus) || self.check_token(TokenType::Minus) {
+            self.next_token();
+            self.term();
+        }
     }
-    pub fn comparison(&mut self) {
+
+    /// A comparison operator
+    fn comparison(&mut self) {
         println!("COMPARISON");
+        self.expression();
+
+        if self.is_comparison_operator() {
+            self.next_token();
+            self.expression();
+        }
+        else {
+            panic!("Expected comparison operator at {}.", self.cur_token.text);
+        }
+        while self.is_comparison_operator() {
+            self.next_token();
+            self.expression();
+        }
+    }
+    fn term(&mut self) {
+        println!("TERM");
+        self.unary();
+
+        while self.check_token(TokenType::Asterisk) || self.check_token(TokenType::Slash) {
+            self.next_token();
+            self.unary();
+        }
+    }
+    fn unary(&mut self) {
+        println!("UNARY");
+        if self.check_token(TokenType::Plus) || self.check_token(TokenType::Minus) {
+            self.next_token();
+        }
+        self.primary();
+    }
+    fn primary(&mut self) {
+        println!("PRIMARY ({})", self.cur_token.text);
+        if self.check_token(TokenType::Number) {
+            self.next_token();
+        }
+        else if self.check_token(TokenType::Ident) {
+            if !self.symbols.contains(&self.cur_token.text) {
+                panic!("Referencing variable before assignment '{}'", self.cur_token.text);
+            }
+            self.next_token();
+        }
+        else {
+            panic!("Unexpected token at '{}'", self.cur_token.text);
+        }
     }
 }
 

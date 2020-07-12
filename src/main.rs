@@ -20,7 +20,6 @@ fn main() {
     let mut parser = parse::Parser::new(&mut lexer);
     parser.program();
     println!("Parsing complete.");
-
 }
 
 pub mod lex;

@@ -51,6 +51,8 @@ pub struct Token {
 }
 
 impl Token {
+    /// Create a new token with a given text and type. We can't
+    /// use the keyword type, so we use kind here.
     pub fn new(token_text: &String, kind: TokenType) -> Self {
         Self {
             text: token_text.clone(),
@@ -77,6 +79,9 @@ impl Token {
     }
 }
 
+/// When we create a new Token, we'd like to have a sentinel,
+/// uninitialized value. However, Rust wants something, so 
+/// it has the Default trait.
 impl Default for Token {
     fn default() -> Self {
         Self {
