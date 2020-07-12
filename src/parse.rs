@@ -95,6 +95,23 @@ impl<'a, 'b> Parser<'a, 'b> {
                     let mut s = String::new();
                     s.push_str("printf(\"");
                     s.push_str(&self.cur_token.text);
+                    s.push_str("\");");
+                    self.emitter.emit_line(&s);
+                    self.next_token();
+                }
+                else {
+                    self.emitter.emit("printf(\"%.2f\", (float)(");
+                    self.expression();
+                    self.emitter.emit_line("));");
+                }
+            }
+            TokenType::PrintLn => {
+                // println!("STATEMENT-PRINT");
+                self.next_token();
+                if self.check_token(TokenType::String) {
+                    let mut s = String::new();
+                    s.push_str("printf(\"");
+                    s.push_str(&self.cur_token.text);
                     s.push_str("\\n\");");
                     self.emitter.emit_line(&s);
                     self.next_token();
