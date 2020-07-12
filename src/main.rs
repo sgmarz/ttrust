@@ -1,6 +1,7 @@
 use std::io::prelude::*;
 use std::fs::File;
 use std::env::args;
+use crate::emit::Emitter;
 
 fn main() {
     let a: Vec<_> = args().collect();
@@ -17,7 +18,7 @@ fn main() {
     }
     // println!("Read {} bytes.", read_result.ok().unwrap());
     let mut lexer = lex::Lexer::new(&input);
-    let mut emitter = emit::Emitter::new(String::from("out.c"));
+    let mut emitter = cemitter::CEmitter::new(String::from("out.c"));
     let mut parser = parse::Parser::new(&mut lexer, &mut emitter);
     parser.program();
     emitter.write_file();
@@ -27,3 +28,4 @@ pub mod lex;
 pub mod parse;
 pub mod emit;
 pub mod token;
+pub mod cemitter;

@@ -5,7 +5,7 @@ use crate::token::{Token, TokenType};
 use std::collections::BTreeSet;
 pub struct Parser<'a, 'b> {
     lexer: &'a mut Lexer,
-    emitter: &'b mut Emitter,
+    emitter: &'b mut dyn Emitter,
     cur_token: Token,
     peek_token: Token,
     symbols: BTreeSet<String>,
@@ -14,7 +14,7 @@ pub struct Parser<'a, 'b> {
 }
 
 impl<'a, 'b> Parser<'a, 'b> {
-    pub fn new(lexer: &'a mut Lexer, emitter: &'b mut Emitter) -> Self {
+    pub fn new(lexer: &'a mut Lexer, emitter: &'b mut dyn Emitter) -> Self {
         let mut s = Self {
             lexer,
             emitter,
