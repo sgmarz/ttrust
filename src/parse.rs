@@ -66,8 +66,7 @@ impl<'a, 'b> Parser<'a, 'b> {
     /// The program itself token
     pub fn program(&mut self) {
         // println!("PROGRAM");
-        self.emitter.header_line("#include <stdio.h>");
-        self.emitter.header_line("int main(void) {");
+        self.emitter.begin();
         // Skip preceding newlines
         while self.check_token(TokenType::Newline) {
             self.next_token();
@@ -77,7 +76,7 @@ impl<'a, 'b> Parser<'a, 'b> {
             self.statement();
         }
 
-        self.emitter.emit_line("return 0;\n}");
+        self.emitter.end();
         for label in self.labels_gotoed.iter() {
             if !self.labels_declared.contains(label) {
                 panic!("Attempted to GOTO to undeclared label '{}'", label);

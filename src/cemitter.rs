@@ -5,6 +5,7 @@
 use crate::emit::Emitter;
 use std::fs::File;
 use std::io::prelude::*;
+use crate::token::TokenType;
 
 pub struct CEmitter {
     full_path: String,
@@ -20,8 +21,6 @@ impl CEmitter {
             code: String::new(),
         }
     }
-}
-impl Emitter for CEmitter {
     fn emit(&mut self, code: &str) {
         self.code.push_str(code);
     }
@@ -35,7 +34,35 @@ impl Emitter for CEmitter {
         self.header.push_str(code);
         self.header.push('\n');
     }
-
+}
+impl Emitter for CEmitter {
+    fn begin(&mut self) {
+        self.emit_line("#include <stdio.h>\n\nint main(void) {");
+    }
+    fn end(&mut self) {
+        self.emit_line("return 0;\n}");
+    }
+    fn emit_op(&mut self, op: TokenType) {
+        self.emit(match op {
+            TokenType::Eq => "=",
+            TokenType::EqEq => "==",
+            TokenType::Gt => ">",
+            TokenType::GtEq => ">=",
+            TokenType::Lt => "<",
+            TokenType::LtEq => "<=",
+            TokenType::Plus => "+",
+            TokenType::Minus => "-",
+            TokenType::Asterisk => "*",
+            TokenType::Slash => "/",
+            _ => ""
+        });
+    }
+    fn emit_val(&mut self, val: &str) {
+        self.emit(val);
+    }
+    fn emit_print(&mut self, val: &str) {
+        self.emit_line("printf(")
+    }
     fn write_file(&self) {
         if let Ok(mut f) = File::create(&self.full_path) {
             // Use let _ to avoid checking the result.

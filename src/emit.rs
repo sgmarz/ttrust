@@ -1,10 +1,18 @@
 // emit.rs
 // Emitter
 
+use crate::token::TokenType;
+
 pub trait Emitter {
-    fn emit(&mut self, code: &str);
-    fn emit_line(&mut self, code: &str);
-    fn header_line(&mut self, code: &str);
+    fn begin(&mut self);
+    fn end(&mut self);
+
+    fn emit_op(&mut self, op: TokenType);
+    fn emit_val(&mut self, val: &str);
+
+    fn emit_print(&mut self, val: &str);
+    fn emit_input(&mut self, val: &str);
+
     fn write_file(&self);
 }
 
