@@ -13,7 +13,7 @@ pub struct Emitter {
 impl Emitter {
     pub fn new(full_path: String) -> Self {
         Self {
-            full_path: full_path,
+            full_path,
             header: String::new(),
             code: String::new(),
         }
