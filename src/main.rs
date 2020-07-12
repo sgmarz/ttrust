@@ -34,6 +34,9 @@ fn main() {
             match a.get(..).unwrap() {
                 "-o" => {
                     i += 1;
+                    if i >= arg_vec.len() {
+                        abort!("No output file specified to -o switch.");
+                    }
                     out_path = arg_vec[i].clone();    
                 }
                 _ => abort!("Unknown switch {}", a),
