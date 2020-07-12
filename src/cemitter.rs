@@ -44,7 +44,7 @@ impl Emitter for CEmitter {
             let _ = f.sync_all();
         }
         else {
-            panic!("Could not open file for writing: '{}'", self.full_path);
+            abort!("Could not open file for writing: '{}'", self.full_path);
         }
     }
 }

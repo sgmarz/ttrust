@@ -88,7 +88,7 @@ impl Lexer {
                             TokenType::NotEq
                         }
                         else {
-                            panic!("Expected !=, got !{}", self.peek());
+                            abort!("Expected !=, got !{}", self.peek());
                         },
                 '"' => {
                     self.next_char();
@@ -96,7 +96,7 @@ impl Lexer {
                     while self.cur_char != '"' {
                         match self.cur_char {
                             '\r' | '\n' | '\t' | '\\' | '%' => {
-                                panic!("Illegal character in string.");
+                                abort!("Illegal character in string.");
                             }
                             _ => {
                                 self.next_char();
@@ -115,7 +115,7 @@ impl Lexer {
                     if self.peek() == '.' {
                         self.next_char();
                         if !self.peek().is_ascii_digit() {
-                            panic!("Illegal character in number.");
+                            abort!("Illegal character in number.");
                         }
                         while self.peek().is_ascii_digit() {
                             self.next_char();
@@ -144,7 +144,7 @@ impl Lexer {
                 }
                 '\n' => TokenType::Newline,
                 '\0' => TokenType::Eof,
-                _ => panic!("Unknown token: '{}'", self.cur_char),
+                _ => abort!("Unknown token: '{}'", self.cur_char),
             };
         self.next_char();
         Token::new(&s, token_type)

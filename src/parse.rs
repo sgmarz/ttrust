@@ -40,7 +40,7 @@ impl<'a, 'b> Parser<'a, 'b> {
     /// Advance to next token (or give an error)
     fn match_token(&mut self, kind: TokenType) {
         if !self.check_token(kind) {
-            panic!("Expected {:?}, got {:?}", kind, self.cur_token.kind);
+            abort!("Expected {:?}, got {:?}", kind, self.cur_token.kind);
         }
         self.next_token();
     }
@@ -80,7 +80,7 @@ impl<'a, 'b> Parser<'a, 'b> {
         self.emitter.emit_line("return 0;\n}");
         for label in self.labels_gotoed.iter() {
             if !self.labels_declared.contains(label) {
-                panic!("Attempted to GOTO to undeclared label '{}'", label);
+                abort!("Attempted to GOTO to undeclared label '{}'", label);
             }
         }
     }
@@ -154,7 +154,7 @@ impl<'a, 'b> Parser<'a, 'b> {
                 // println!("STATEMENT-LABEL");
                 self.next_token();
                 if self.labels_declared.contains(&self.cur_token.text) {
-                    panic!("Label already declared '{}'", self.cur_token.text);
+                    abort!("Label already declared '{}'", self.cur_token.text);
                 }
                 let mut s = String::from(&self.cur_token.text);
                 s.push(':');
@@ -208,7 +208,7 @@ impl<'a, 'b> Parser<'a, 'b> {
                 self.match_token(TokenType::Ident);
             }
             _ => {
-                panic!("Invalid statement ({:?})", self.cur_token.kind);
+                abort!("Invalid statement ({:?})", self.cur_token.kind);
             }
         }
         self.nl();
@@ -245,7 +245,7 @@ impl<'a, 'b> Parser<'a, 'b> {
             self.expression();
         }
         else {
-            panic!("Expected comparison operator at {}.", self.cur_token.text);
+            abort!("Expected comparison operator at {}.", self.cur_token.text);
         }
         while self.is_comparison_operator() {
             self.emitter.emit(&self.cur_token.text);
@@ -279,13 +279,13 @@ impl<'a, 'b> Parser<'a, 'b> {
         }
         else if self.check_token(TokenType::Ident) {
             if !self.symbols.contains(&self.cur_token.text) {
-                panic!("Referencing variable before assignment '{}'", self.cur_token.text);
+                abort!("Referencing variable before assignment '{}'", self.cur_token.text);
             }
             self.emitter.emit(&self.cur_token.text);
             self.next_token();
         }
         else {
-            panic!("Unexpected token at '{}'", self.cur_token.text);
+            abort!("Unexpected token at '{}'", self.cur_token.text);
         }
     }
 }
