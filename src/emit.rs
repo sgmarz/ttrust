@@ -35,7 +35,7 @@ impl Emitter {
 
     pub fn write_file(&self) {
         if let Ok(mut f) = File::create(&self.full_path) {
-            // Use let _ to
+            // Use let _ to avoid checking the result.
             let _ = f.write_all(self.header.as_bytes());
             let _ = f.write_all(self.code.as_bytes());
             let _ = f.sync_all();
