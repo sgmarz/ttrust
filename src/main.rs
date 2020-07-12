@@ -31,12 +31,12 @@ fn main() {
     while i < arg_vec.len() {
         let a = &arg_vec[i];
         if a.get(0..1) == Some("-") {
-            if a.get(1..2).unwrap() == "o" {
-                i += 1;
-                out_path = arg_vec[i].clone();
-            }
-            else {
-                abort!("Unknown switch {}", a);
+            match a.get(..).unwrap() {
+                "-o" => {
+                    i += 1;
+                    out_path = arg_vec[i].clone();    
+                }
+                _ => abort!("Unknown switch {}", a),
             }
         }
         else {
