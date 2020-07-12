@@ -20,13 +20,37 @@ macro_rules! abort
 			});
 }
 fn main() {
-    let a: Vec<_> = args().collect();
-    if a.len() < 2 {
+    let arg_vec: Vec<_> = args().collect();
+    if arg_vec.len() < 2 {
         abort!("Not enough arguments provided.");
     }
     // println!("Teeny tiny written in Rust.");
-    let path = a[1].clone();
-    let mut f = File::open(path).expect("Unable to open file.");
+    let mut in_path = String::new();
+    let mut out_path = String::from("out.c");
+    let mut i = 1;
+    while i < arg_vec.len() {
+        let a = &arg_vec[i];
+        if a.get(0..1) == Some("-") {
+            if a.get(1..2).unwrap() == "o" {
+                i += 1;
+                out_path = arg_vec[i].clone();
+            }
+            else {
+                abort!("Unknown switch {}", a);
+            }
+        }
+        else {
+            if in_path.len() != 0 {
+                abort!("Input file name specified more than once.");
+            }
+            in_path = a.clone();
+        }
+        i += 1;
+    }
+    if in_path.len() < 1 {
+        abort!("No filename specified.");
+    }
+    let mut f = File::open(&in_path).expect("Unable to open file.");
     let mut input = String::new();
     let read_result = f.read_to_string(&mut input);
     if read_result.is_err() {
@@ -34,7 +58,7 @@ fn main() {
     }
     // println!("Read {} bytes.", read_result.ok().unwrap());
     let mut lexer = lex::Lexer::new(&input);
-    let mut emitter = cemitter::CEmitter::new(String::from("out.c"));
+    let mut emitter = cemitter::CEmitter::new(out_path);
     let mut parser = parse::Parser::new(&mut lexer, &mut emitter);
     parser.program();
     emitter.write_file();
