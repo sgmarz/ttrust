@@ -7,7 +7,7 @@ fn main() {
     if a.len() < 2 {
         panic!("Not enough arguments provided.");
     }
-    println!("Teeny tiny written in Rust.");
+    // println!("Teeny tiny written in Rust.");
     let path = a[1].clone();
     let mut f = File::open(path).expect("Unable to open file.");
     let mut input = String::new();
@@ -15,11 +15,12 @@ fn main() {
     if read_result.is_err() {
         panic!("Unable to read input file.");
     }
-    println!("Read {} bytes.", read_result.ok().unwrap());
+    // println!("Read {} bytes.", read_result.ok().unwrap());
     let mut lexer = lex::Lexer::new(&input);
-    let mut parser = parse::Parser::new(&mut lexer);
+    let mut emitter = emit::Emitter::new(String::from("out.c"));
+    let mut parser = parse::Parser::new(&mut lexer, &mut emitter);
     parser.program();
-    println!("Parsing complete.");
+    emitter.write_file();
 }
 
 pub mod lex;
