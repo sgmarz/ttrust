@@ -1,3 +1,7 @@
+# Teeny Tiny Compiler
+
+Rust version of [https://github.com/AZHenley/teenytinycompiler](https://github.com/AZHenley/teenytinycompiler)
+
 # Usage
 
 Example usage:
